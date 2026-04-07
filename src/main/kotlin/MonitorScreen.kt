@@ -40,7 +40,8 @@ fun MonitorScreen() {
 
     fun applyFilters() {
         filteredMachines = machines.filter { machine ->
-            (filterText.isEmpty() || machine.location.contains(filterText, ignoreCase = true) ||
+            (filterText.isEmpty() ||
+                    machine.location.contains(filterText, ignoreCase = true) ||
                     machine.serialCode.contains(filterText, ignoreCase = true)) &&
                     (!showOnlyOnline || machine.connectionStatus == "Online") &&
                     (!showOnlyOffline || machine.connectionStatus == "Offline")
@@ -60,34 +61,50 @@ fun MonitorScreen() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Монитор торговых автоматов", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("Монитор торговых автоматов", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263238))
             Spacer(modifier = Modifier.weight(1f))
-            Text("данные актуальны на ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))} (UTC+3)", fontSize = 12.sp, color = Color.Gray)
+            Text(
+                "данные актуальны на ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))} (UTC+3)",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Card(elevation = 4.dp, modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Общее состояние", fontWeight = FontWeight.Medium)
+                Text("Общее состояние", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+
                 Row {
                     Checkbox(checked = showOnlyOnline, onCheckedChange = { showOnlyOnline = it; applyFilters() })
                     Text("Online", modifier = Modifier.padding(end = 16.dp))
                     Checkbox(checked = showOnlyOffline, onCheckedChange = { showOnlyOffline = it; applyFilters() })
                     Text("Offline")
                 }
+
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = filterText, onValueChange = { filterText = it; applyFilters() }, label = { Text("Поиск (адрес/серийный номер)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = filterText,
+                    onValueChange = { filterText = it; applyFilters() },
+                    label = { Text("Поиск (адрес/серийный номер)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
                 Row {
-                    Button(onClick = { applyFilters() }) { Text("Применить") }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    OutlinedButton(onClick = { filterText = ""; showOnlyOnline = false; showOnlyOffline = false; applyFilters() }) { Text("Очистить") }
+                    OutlinedButton(onClick = { filterText = ""; showOnlyOnline = false; showOnlyOffline = false; applyFilters() }) {
+                        Text("Очистить")
+                    }
                     Spacer(modifier = Modifier.weight(1f))
-                    Button(onClick = { exportToExcel() }, colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4CAF50))) {
-                        Icon(Icons.Filled.Save, contentDescription = null)   // ← ИСПРАВЛЕНО
+                    Button(
+                        onClick = { exportToExcel() },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4CAF50))
+                    ) {
+                        Icon(Icons.Filled.Save, contentDescription = null)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Экспорт в Excel")
+                        Text("Экспорт в CSV")
                     }
                 }
             }
@@ -106,7 +123,8 @@ fun MonitorScreen() {
         } else {
             Card(elevation = 4.dp, modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Row(modifier = Modifier.background(Color(0xFF1a237e)).padding(12.dp)) {
+                    // Заголовок таблицы
+                    Row(modifier = Modifier.background(Color(0xFF37474F)).padding(12.dp)) {
                         TableHeaderCell("#", 0.5f)
                         TableHeaderCell("Торговый автомат", 2f)
                         TableHeaderCell("Связь", 1f)
@@ -117,11 +135,26 @@ fun MonitorScreen() {
                         TableHeaderCell("Информация", 1f)
                         TableHeaderCell("Доп.", 1f)
                     }
+
                     filteredMachines.forEach { machine ->
-                        Row(modifier = Modifier.fillMaxWidth().clickable { }.padding(12.dp).border(BorderStroke(1.dp, Color.LightGray))) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { }
+                                .padding(12.dp)
+                                .border(BorderStroke(1.dp, Color.LightGray))
+                        ) {
                             TableCell(machine.id.toString(), 0.5f)
                             TableCell("${machine.serialCode} - \"${machine.location}\"", 2f)
-                            TableCell(machine.connectionStatus, 1f)
+                            TableCell(
+                                text = machine.connectionStatus,
+                                colWeight = 1f,
+                                color = when (machine.connectionStatus) {
+                                    "Online" -> Color(0xFF4CAF50)
+                                    "Offline" -> Color.Red
+                                    else -> Color(0xFFFF9800)
+                                }
+                            )
                             TableCell(machine.loadInfo, 1f)
                             TableCell(machine.cashAmount, 1.5f)
                             TableCell(machine.lastEvent, 1.5f)
@@ -129,6 +162,7 @@ fun MonitorScreen() {
                             TableCell(machine.brandModel, 1f)
                             TableCell(machine.additionalInfo, 1f)
                         }
+
                         machine.detailRows?.let {
                             Row(modifier = Modifier.background(Color(0xFFF5F5F5)).padding(horizontal = 12.dp, vertical = 4.dp)) {
                                 Spacer(modifier = Modifier.width(48.dp))
@@ -137,9 +171,19 @@ fun MonitorScreen() {
                         }
                         Divider()
                     }
+
+                    // Итоговая строка
                     Row(modifier = Modifier.background(Color(0xFFE0E0E0)).padding(12.dp)) {
                         val totalCash = filteredMachines.sumOf { it.cashAmount.filter { c -> c.isDigit() }.toIntOrNull() ?: 0 }
-                        Text("Итого автоматов: ${filteredMachines.size} (${filteredMachines.count { it.connectionStatus == "Online" }} / ${filteredMachines.count { it.connectionStatus == "Offline" }} / 0). Денег в автоматах: $totalCash р.", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Итого автоматов: ${filteredMachines.size} " +
+                                    "(${filteredMachines.count { it.connectionStatus == "Online" }} Online / " +
+                                    "${filteredMachines.count { it.connectionStatus == "Offline" }} Offline). " +
+                                    "Денег в автоматах: $totalCash ₽",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = Color(0xFF263238)
+                        )
                     }
                 }
             }
@@ -159,10 +203,11 @@ fun RowScope.TableHeaderCell(text: String, colWeight: Float) {
 }
 
 @Composable
-fun RowScope.TableCell(text: String, colWeight: Float) {
+fun RowScope.TableCell(text: String, colWeight: Float, color: Color = Color.Unspecified) {
     Text(
         text = text,
         modifier = Modifier.weight(colWeight),
-        fontSize = 11.sp
+        fontSize = 11.sp,
+        color = color
     )
 }

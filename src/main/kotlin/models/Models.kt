@@ -37,5 +37,5 @@ data class User(
     val id: Int,
     val fullName: String,
     val email: String,
-    val role: String
+    val role: String          // ← Добавлено для поддержки ролей
 )

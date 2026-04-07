@@ -1,0 +1,101 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
+
+.app { display: flex; height: 100vh; }
+
+.sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #263238, #1e2a34);
+  color: white;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+.logo-icon { font-size: 32px; }
+.logo h2 { color: #FF9800; }
+
+.menu-item {
+  padding: 14px 20px;
+  margin: 6px 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.menu-item:hover, .menu-item.active {
+  background: #FF9800;
+  color: #263238;
+}
+
+.user-info {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+}
+
+.avatar {
+  width: 48px; height: 48px;
+  background: #FF9800;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.main-content { flex: 1; padding: 24px; overflow-y: auto; }
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary { background: #FF9800; color: white; }
+.btn-secondary { background: #e0e0e0; color: #263238; }
+
+/* Login */
+.login-screen {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #263238, #1e2a34);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 15px 0;
+}

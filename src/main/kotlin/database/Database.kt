@@ -20,21 +20,21 @@ class Database {
         val connection = getConnection()
         try {
             val stmt = connection.prepareStatement(
-                "SELECT id, full_name, email FROM users WHERE email = ? AND password = ?"
+                "SELECT id, full_name, email, role FROM users WHERE email = ? AND password = ?"
             )
             stmt.setString(1, email)
             stmt.setString(2, password)
             val rs = stmt.executeQuery()
+
             if (rs.next()) {
-                User(
+                return@withContext User(
                     id = rs.getInt("id"),
                     fullName = rs.getString("full_name"),
                     email = rs.getString("email"),
-                    role = "ADMIN"
+                    role = rs.getString("role")
                 )
-            } else {
-                null
             }
+            null
         } catch (e: Exception) {
             e.printStackTrace()
             null

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.User
@@ -41,8 +42,8 @@ fun DashboardScreen(user: User) {
         Text(
             text = "Личный кабинет. Главная",
             fontSize = 24.sp,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-            color = Color(0xFF1a237e),
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF263238),        // ← Тёмно-серый
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -123,12 +124,10 @@ fun WidgetCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = 4.dp,
+        elevation = 6.dp,
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -139,13 +138,10 @@ fun WidgetCard(
                 Text(
                     text = title,
                     fontSize = 16.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
-                    color = Color(0xFF1a237e)
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF263238)     // ← Тёмно-серый заголовок
                 )
-                IconButton(
-                    onClick = onClose,
-                    modifier = Modifier.size(32.dp)
-                ) {
+                IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
                     Icon(
                         Icons.Default.Close,
                         contentDescription = "Скрыть",
@@ -169,6 +165,7 @@ fun WidgetCard(
     }
 }
 
+// Виджеты (с минимальными правками цвета)
 @Composable
 fun EfficiencyWidget() {
     val workingPercent = 100.0
@@ -180,40 +177,22 @@ fun EfficiencyWidget() {
         Text("Работающие автоматы", fontSize = 14.sp, color = Color.Gray)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Box(
-            modifier = Modifier.size(150.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            androidx.compose.foundation.Canvas(
-                modifier = Modifier.fillMaxSize()
-            ) {
+        Box(modifier = Modifier.size(150.dp), contentAlignment = Alignment.Center) {
+            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
                 val sweepAngle = (workingPercent * 3.6f).toFloat()
-                drawArc(
-                    color = Color(0xFF4CAF50),
-                    startAngle = -90f,
-                    sweepAngle = sweepAngle,
-                    useCenter = true
-                )
-                drawArc(
-                    color = Color.LightGray,
-                    startAngle = -90f + sweepAngle,
-                    sweepAngle = 360f - sweepAngle,
-                    useCenter = true
-                )
+                drawArc(color = Color(0xFF4CAF50), startAngle = -90f, sweepAngle = sweepAngle, useCenter = true)
+                drawArc(color = Color.LightGray, startAngle = -90f + sweepAngle, sweepAngle = 360f - sweepAngle, useCenter = true)
             }
             Text(
                 text = "${String.format("%.1f", workingPercent)}%",
                 fontSize = 24.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF263238)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             LegendItem(color = Color(0xFF4CAF50), text = "Работают")
             LegendItem(color = Color.Red, text = "Не работают")
             LegendItem(color = Color(0xFFFF9800), text = "На обслуживании")
@@ -224,12 +203,7 @@ fun EfficiencyWidget() {
 @Composable
 fun LegendItem(color: Color, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(color)
-        )
+        Box(modifier = Modifier.size(12.dp).clip(RoundedCornerShape(6.dp)).background(color))
         Spacer(modifier = Modifier.width(4.dp))
         Text(text, fontSize = 11.sp)
     }
@@ -237,11 +211,7 @@ fun LegendItem(color: Color, text: String) {
 
 @Composable
 fun StatusWidget() {
-    val stats = mapOf(
-        "Работает" to 3,
-        "Не работает" to 0,
-        "На обслуживании" to 0
-    )
+    val stats = mapOf("Работает" to 3, "Не работает" to 0, "На обслуживании" to 0)
     val total = stats.values.sum()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -253,20 +223,14 @@ fun StatusWidget() {
                 else -> Color(0xFFFF9800)
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(status, fontSize = 12.sp)
                 Text("$count / $total", fontSize = 12.sp, color = color)
             }
             Spacer(modifier = Modifier.height(4.dp))
             LinearProgressIndicator(
                 progress = percentage,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                 color = color,
                 backgroundColor = Color.LightGray
             )
@@ -295,8 +259,8 @@ fun SummaryRow(title: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, fontSize = 13.sp)
-        Text(value, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color(0xFF1a237e))
+        Text(title, fontSize = 13.sp, color = Color(0xFF263238))
+        Text(value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263238))
     }
 }
 
@@ -312,21 +276,10 @@ fun SalesWidget() {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            FilterChip(
-                selected = filterType == "amount",
-                onClick = { filterType = "amount" },
-                label = "По сумме"
-            )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            FilterChip(selected = filterType == "amount", onClick = { filterType = "amount" }, label = "По сумме")
             Spacer(modifier = Modifier.width(8.dp))
-            FilterChip(
-                selected = filterType == "quantity",
-                onClick = { filterType = "quantity" },
-                label = "По количеству"
-            )
+            FilterChip(selected = filterType == "quantity", onClick = { filterType = "quantity" }, label = "По количеству")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -334,8 +287,7 @@ fun SalesWidget() {
         val salesData = listOf(
             Pair("01.03", 15000), Pair("02.03", 12000), Pair("03.03", 10000),
             Pair("04.03", 8000), Pair("05.03", 5000), Pair("06.03", 3000),
-            Pair("07.03", 2000), Pair("08.03", 1000), Pair("09.03", 500),
-            Pair("10.03", 0)
+            Pair("07.03", 2000), Pair("08.03", 1000), Pair("09.03", 500), Pair("10.03", 0)
         )
 
         val maxValue = salesData.maxOfOrNull { it.second } ?: 1
@@ -348,18 +300,10 @@ fun SalesWidget() {
             ) {
                 Text(date, fontSize = 10.sp, modifier = Modifier.width(40.dp))
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(24.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Color.LightGray)
+                    modifier = Modifier.weight(1f).height(24.dp).clip(RoundedCornerShape(4.dp)).background(Color.LightGray)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(percentage)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFFF9800))
+                        modifier = Modifier.fillMaxHeight().fillMaxWidth(percentage).clip(RoundedCornerShape(4.dp)).background(Color(0xFFFF9800))
                     )
                 }
                 Text(
@@ -403,8 +347,8 @@ fun NewsWidget() {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         news.forEachIndexed { index, (date, title, _) ->
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                Text(date, fontSize = 11.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium, color = Color(0xFFFF9800))
-                Text(title, fontSize = 12.sp, color = Color.Black)
+                Text(date, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFFFF9800))
+                Text(title, fontSize = 12.sp, color = Color(0xFF263238))
             }
             if (index < news.size - 1) Divider()
         }
@@ -432,7 +376,7 @@ fun AddWidgetDialog(
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = Color(0xFFFF9800))
+                        Icon(Icons.Default.Add, null, tint = Color(0xFFFF9800))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(widget.title)
                     }
@@ -440,9 +384,7 @@ fun AddWidgetDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Закрыть")
-            }
+            TextButton(onClick = onDismiss) { Text("Закрыть") }
         }
     )
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.User
@@ -17,16 +18,19 @@ import models.User
 @Composable
 fun MainAppScreen(user: User, onLogout: () -> Unit) {
     var selectedMenuItem by remember { mutableStateOf("Главная") }
-    var expandedMenuItem by remember { mutableStateOf<String?>(null) }
+    var expandedAdmin by remember { mutableStateOf(false) }
     var showProfileMenu by remember { mutableStateOf(false) }
 
+    val isAdmin = user.role == "admin"
+    val isManager = user.role == "manager" || isAdmin
+    val isEngineer = user.role == "engineer" || isAdmin
+
     Row(modifier = Modifier.fillMaxSize()) {
-        // Sidebar
         Column(
             modifier = Modifier
                 .width(280.dp)
                 .fillMaxHeight()
-                .background(Color(0xFF1a237e))
+                .background(Color(0xFF263238))
         ) {
             // Логотип
             Box(
@@ -34,25 +38,20 @@ fun MainAppScreen(user: User, onLogout: () -> Unit) {
                     .fillMaxWidth()
                     .padding(16.dp)
                     .clip(MaterialTheme.shapes.medium)
-                    .background(Color(0xFF0d47a1))
+                    .background(Color(0xFF37474F))
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "ООО Торговые Автоматы",
-                    fontSize = 16.sp,
-                    color = Color.White,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
+                Text("КПТ Vending", fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
             }
 
-            // Информация о пользователе
+            // Профиль
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
                     .clip(MaterialTheme.shapes.medium)
-                    .background(Color(0xFF0d47a1))
+                    .background(Color(0xFF37474F))
                     .clickable { showProfileMenu = !showProfileMenu }
             ) {
                 Row(
@@ -60,55 +59,37 @@ fun MainAppScreen(user: User, onLogout: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(MaterialTheme.shapes.small)
-                            .background(Color(0xFFFF9800)),
+                        modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small).background(Color(0xFFFF9800)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = user.fullName.take(2).uppercase(),
-                            fontSize = 14.sp,
-                            color = Color.White
-                        )
+                        Text(user.fullName.take(2).uppercase(), fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold)
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(Modifier.width(12.dp))
 
                     Column {
+                        Text(user.fullName, fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Medium)
                         Text(
-                            text = user.fullName,
-                            fontSize = 14.sp,
-                            color = Color.White,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                        )
-                        Text(
-                            text = when (user.role) {
-                                "ADMIN" -> "Администратор"
-                                "OPERATOR" -> "Оператор"
+                            when (user.role) {
+                                "admin" -> "Администратор"
+                                "manager" -> "Менеджер"
+                                "engineer" -> "Инженер"
                                 else -> "Пользователь"
                             },
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.7f)
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.75f)
                         )
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
+                    Spacer(Modifier.weight(1f))
+                    Icon(Icons.Default.ArrowDropDown, null, tint = Color.White)
                 }
             }
 
-            // Dropdown меню профиля
+            // Меню профиля
             if (showProfileMenu) {
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     elevation = 4.dp
                 ) {
                     Column {
@@ -136,124 +117,95 @@ fun MainAppScreen(user: User, onLogout: () -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Основные пункты меню
-            SidebarMenuItemText(
+            // Основное меню
+            SidebarMenuItem(
                 title = "Главная",
                 isSelected = selectedMenuItem == "Главная",
                 onClick = { selectedMenuItem = "Главная" }
             )
 
-            SidebarMenuItemText(
-                title = "Монитор ТА",
-                isSelected = selectedMenuItem == "Монитор ТА",
-                onClick = { selectedMenuItem = "Монитор ТА" }
-            )
-
-            SidebarMenuItemText(
-                title = "Детальные отчеты",
-                isSelected = selectedMenuItem == "Детальные отчеты",
-                onClick = { selectedMenuItem = "Детальные отчеты" }
-            )
-
-            SidebarMenuItemText(
-                title = "Учет ТМЦ",
-                isSelected = selectedMenuItem == "Учет ТМЦ",
-                onClick = { selectedMenuItem = "Учет ТМЦ" }
-            )
-
-            // Администрирование с подменю
-            var isAdminExpanded by remember { mutableStateOf(expandedMenuItem == "Администрирование") }
-
-            SidebarMenuItemText(
-                title = "Администрирование",
-                isSelected = selectedMenuItem == "Администрирование" || expandedMenuItem == "Администрирование",
-                onClick = {
-                    expandedMenuItem = if (isAdminExpanded) null else "Администрирование"
-                    isAdminExpanded = !isAdminExpanded
-                },
-                trailingText = if (isAdminExpanded) "▼" else "▶"
-            )
-
-            if (isAdminExpanded) {
-                SidebarSubMenuItemText(
-                    title = "Торговые автоматы",
-                    isSelected = selectedMenuItem == "Торговые автоматы",
-                    onClick = { selectedMenuItem = "Торговые автоматы" }
+            if (isManager) {
+                SidebarMenuItem(
+                    title = "Монитор ТА",
+                    isSelected = selectedMenuItem == "Монитор ТА",
+                    onClick = { selectedMenuItem = "Монитор ТА" }
                 )
-                SidebarSubMenuItemText(
-                    title = "Компании",
-                    isSelected = selectedMenuItem == "Компании",
-                    onClick = { selectedMenuItem = "Компании" }
-                )
-                SidebarSubMenuItemText(
-                    title = "Пользователи",
-                    isSelected = selectedMenuItem == "Пользователи",
-                    onClick = { selectedMenuItem = "Пользователи" }
-                )
-                SidebarSubMenuItemText(
-                    title = "Модемы",
-                    isSelected = selectedMenuItem == "Модемы",
-                    onClick = { selectedMenuItem = "Модемы" }
-                )
-                SidebarSubMenuItemText(
-                    title = "Дополнительные",
-                    isSelected = selectedMenuItem == "Дополнительные",
-                    onClick = { selectedMenuItem = "Дополнительные" }
+                SidebarMenuItem(
+                    title = "Детальные отчеты",
+                    isSelected = selectedMenuItem == "Детальные отчеты",
+                    onClick = { selectedMenuItem = "Детальные отчеты" }
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            if (isEngineer || isManager) {
+                SidebarMenuItem(
+                    title = "Учет ТМЦ",
+                    isSelected = selectedMenuItem == "Учет ТМЦ",
+                    onClick = { selectedMenuItem = "Учет ТМЦ" }
+                )
+            }
+
+            if (isAdmin) {
+                SidebarMenuItem(
+                    title = "Администрирование",
+                    isSelected = expandedAdmin,
+                    onClick = { expandedAdmin = !expandedAdmin },
+                    trailing = if (expandedAdmin) "▼" else "▶"
+                )
+
+                if (expandedAdmin) {
+                    SidebarSubMenuItem("Торговые автоматы", selectedMenuItem == "Торговые автоматы") { selectedMenuItem = "Торговые автоматы" }
+                    SidebarSubMenuItem("Компании", false) { }
+                    SidebarSubMenuItem("Пользователи", false) { }
+                    SidebarSubMenuItem("Модемы", false) { }
+                    SidebarSubMenuItem("Дополнительные", false) { }
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
         }
 
         // Основной контент
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF5F5F5))
-        ) {
+        Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF5F5F5))) {
             when (selectedMenuItem) {
                 "Главная" -> DashboardScreen(user)
-                "Монитор ТА" -> MonitorScreen()
-                "Детальные отчеты" -> ReportsScreen()
-                "Учет ТМЦ" -> InventoryScreen()
-                "Торговые автоматы" -> VendingMachinesAdminScreen()
+                "Монитор ТА" -> if (isManager) MonitorScreen() else Text("Доступ запрещён", modifier = Modifier.align(Alignment.Center))
+                "Детальные отчеты" -> if (isManager) ReportsScreen() else Text("Доступ запрещён", modifier = Modifier.align(Alignment.Center))
+                "Учет ТМЦ" -> if (isEngineer || isManager) InventoryScreen() else Text("Доступ запрещён", modifier = Modifier.align(Alignment.Center))
+                "Торговые автоматы" -> if (isAdmin) VendingMachinesAdminScreen() else Text("Доступ запрещён", modifier = Modifier.align(Alignment.Center))
                 else -> DashboardScreen(user)
             }
         }
     }
 }
 
+// ====================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======================
+
 @Composable
-fun SidebarMenuItemText(
+fun SidebarMenuItem(
     title: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    trailingText: String? = null
+    trailing: String? = null
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .background(
-                if (isSelected) Color(0xFF0d47a1) else Color.Transparent
-            )
-            .padding(12.dp)
+            .background(if (isSelected) Color(0xFF37474F) else Color.Transparent)
+            .padding(14.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(title, fontSize = 14.sp, color = Color.White, modifier = Modifier.weight(1f))
-            trailingText?.let {
-                Text(it, fontSize = 12.sp, color = Color.White)
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(title, fontSize = 15.sp, color = Color.White, modifier = Modifier.weight(1f))
+            trailing?.let { Text(it, fontSize = 13.sp, color = Color.White.copy(0.8f)) }
         }
     }
 }
 
 @Composable
-fun SidebarSubMenuItemText(
+fun SidebarSubMenuItem(
     title: String,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -262,12 +214,10 @@ fun SidebarSubMenuItemText(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .background(
-                if (isSelected) Color(0xFF0d47a1) else Color.Transparent
-            )
-            .padding(start = 24.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)
+            .background(if (isSelected) Color(0xFF455A64) else Color.Transparent)
+            .padding(start = 32.dp, end = 14.dp, top = 10.dp, bottom = 10.dp)
     ) {
-        Text(title, fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f))
+        Text(title, fontSize = 14.sp, color = Color.White.copy(alpha = 0.9f))
     }
 }
 
@@ -286,7 +236,7 @@ fun ProfileMenuItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(Modifier.width(12.dp))
         Text(title, fontSize = 14.sp, color = color)
     }
 }
